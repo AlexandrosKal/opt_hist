@@ -18,7 +18,6 @@ class SDSummary(DeletionSummary):
         # 'arb' for arbitary deletions
 
     def summarize(self, k):
-
         # Find the optimal summary that allows for k deletions
         # using the summarize then delete strategy.
         # Start with the optimal buckets with no deletions.
@@ -89,9 +88,36 @@ class SDSummary(DeletionSummary):
         self.L[q, b] = minl # left edge of rightmost bucket
         self.R[q, b] = minr # right edge of rightmost bucket
 
+    def getBucketRanges(self):
+        # Helper function that calculates the indexes of the values
+        # that represent the edges of each bucket by using self.L
+
+        # returns: left_edges = indices of the elements in self.values that are the left edges of the bukets (ascending order)
+        #          right_edges = indices of the elements in self.values that are the right edges of the bukets (ascending order)
+        #          n_elem = number of elements contained in the respective bucket
+        # Only available for the method 'con'
+
+        if self.method != 'con':
+            print("Method not supported when the method is not `con`")
+            return
+        right_edges = np.zeros(self.beta, dtype=int)
+        left_edges = np.zeros(self.beta, dtype=int)
+        right_edges[self.beta - 1] = self.R[len(self.f)-1, self.beta-1]
+        left_edges[self.beta - 1] = self.L[len(self.f)-1, self.beta-1]
+        n = left_edges[self.beta - 1] - 1
+        for b in range(self.beta - 2, -1, -1):
+            left_edges[b] = self.L[n, b]
+            right_edges[b] = self.R[n, b]
+            n = left_edges[b]  - 1
+
+        n_elem = np.zeros(self.beta)
+        for i in range(self.beta):
+            n_elem[i] = self.sumf[right_edges[i]] - self.sumf[left_edges[i]] + self.f[left_edges[i]]
+
+        return left_edges, right_edges, n_elem
+
 
     def printSummary(self):
-
     # Print a text representation of  the Summary following the format:
     # Bucket (number) [bucket_start, bucket_end]: number of elements inside the bucket')
     # Only available for the method 'con'
