@@ -3,7 +3,7 @@ A python implementation of the algorithms described in the following paper:
 
 Rachel Behar, Sara Cohen. Optimal Histograms with Outliers. EDBT 2020: 181-192. https://openproceedings.org/2020/conf/edbt/paper_93.pdf
 
-This project was implemented under the frame of the Database Systems course of the DSIT MSc programme @ NKUA
+This project was implemented under the frame of the Database Systems course of the DSIT MSc programme @ NKUA.
 
 
 
@@ -19,5 +19,7 @@ This project was implemented under the frame of the Database Systems course of t
   - `$:source ./venv/bin/activate`
   - `$:pip3 install wheel && pip3 install -r requirements.txt` 
 4. Run jupyter lab:
-  `$:jupyter lab`
+  `$:jupyter lab`. Make sure you run the command inside the virtualenv you created. 
 5. In jupyter lab find the notebooks in the experiments folder and run the exeriments (there are instructions there).
+Make sure you select the virtualenv you created as the kernel of the notebook you wish to run (probably named `Python 3 (ipykernel)`
+if you started jupyter lab inside the virtualenv).
