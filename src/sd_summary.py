@@ -7,8 +7,8 @@ class SDSummary(DeletionSummary):
     def __init__(self, values, f, beta, k, method='con'):
         DeletionSummary.__init__(self, values, f, beta, k)
 
-        self.L = np.zeros((len(f), beta)) # Matrix used to store the left edge of the rightmost bucket
-        self.R = np.zeros((len(f), beta)) # Matrix used to store the right edge of the rightmost bucket
+        self.L = np.zeros((beta, k + 1)) # Matrix used to store the left edge of the beta bucket with k deletions
+        self.R = np.zeros((beta, k + 1)) # Matrix used to store the right edge of the beta bucket with k deletions
 
         self.M = np.zeros((beta, k + 1)) # Matrix that stores the error values. M[b, k] = optimal error with b buckets and k deletions
 
@@ -41,8 +41,8 @@ class SDSummary(DeletionSummary):
             if self.method == 'con':
                 self.M[0, k_prime], opt_r , opt_l, _ = self.conSingleBucketError(p1, q1, k_prime)
                 if self.M[0, k_prime] < e_min:
-                    self.L[q1, 0] = opt_r # left edge of rightmost bucket
-                    self.R[q1, 0] = opt_l # right edge of rightmost bucket
+                    self.L[0, k_prime] = opt_r # left edge of rightmost bucket
+                    self.R[0, k_prime] = opt_l # right edge of rightmost bucket
                     e_min = self.M[0, k_prime]
             elif self.method == 'arb':
                 self.M[0, k_prime] = self.arbSingleBucketError(p1, q1, k_prime)
@@ -70,8 +70,8 @@ class SDSummary(DeletionSummary):
         n = n_el[b]
         opt_l = 0
         opt_r = 0
-        minl = 0
-        minr = 0
+        minl = p
+        minr = q
         for k_prime in range(k + 1):
             e = self.M[b-1, k-k_prime]
             if self.method == 'con':
@@ -85,8 +85,8 @@ class SDSummary(DeletionSummary):
                 minl = opt_l
                 minr = opt_r
             self.M[b, k] = np.fmin(self.M[b, k], e + e_prime)
-        self.L[q, b] = minl # left edge of rightmost bucket
-        self.R[q, b] = minr # right edge of rightmost bucket
+        self.L[b, k] = minl # left edge of rightmost bucket
+        self.R[b, k] = minr # right edge of rightmost bucket
 
     def getBucketRanges(self):
         # Helper function that calculates the indexes of the values
@@ -99,16 +99,30 @@ class SDSummary(DeletionSummary):
 
         if self.method != 'con':
             print("Method not supported when the method is not `con`")
-            return
+            return [], [], []
+
         right_edges = np.zeros(self.beta, dtype=int)
         left_edges = np.zeros(self.beta, dtype=int)
-        right_edges[self.beta - 1] = self.R[len(self.f)-1, self.beta-1]
-        left_edges[self.beta - 1] = self.L[len(self.f)-1, self.beta-1]
-        n = left_edges[self.beta - 1] - 1
+        right_edges[self.beta - 1] = self.R[self.beta-1, self.k]
+        left_edges[self.beta - 1] = self.L[self.beta-1, self.k]
+        n_el_no_del = self.sumf[len(self.f)-1]- self.sumf[left_edges[self.beta-1]] + self.f[left_edges[self.beta-1]]
+        n_el_del = self.sumf[right_edges[self.beta-1]]- self.sumf[left_edges[self.beta-1]] + self.f[left_edges[self.beta-1]]
+
+        test_del = n_el_no_del - n_el_del
+        k = self.k - test_del
+        k = k.astype(int)
+
         for b in range(self.beta - 2, -1, -1):
-            left_edges[b] = self.L[n, b]
-            right_edges[b] = self.R[n, b]
-            n = left_edges[b]  - 1
+            left_edges[b] = self.L[b, k]
+            right_edges[b] = self.R[b, k]
+            if b == 0 :
+                n_el_no_del = self.sumf[left_edges[b+1] - 1]- self.sumf[0] + self.f[0]
+            else:
+                n_el_no_del = self.sumf[left_edges[b+1] - 1]- self.sumf[left_edges[b]] + self.f[left_edges[b]]
+            n_el_del = self.sumf[right_edges[b]]- self.sumf[left_edges[b]] + self.f[left_edges[b]]
+            test_del = n_el_no_del - n_el_del
+            k = k - test_del
+            k = k.astype(int)
 
         n_elem = np.zeros(self.beta)
         for i in range(self.beta):
