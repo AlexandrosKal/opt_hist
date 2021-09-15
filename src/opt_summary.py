@@ -140,6 +140,10 @@ class OptSummary(DeletionSummary):
         #          n_elem = number of elements contained in the respective bucket
         # Only works with the method 'con'
 
+        if self.method != 'con':
+            print("Method not supported when the method is not `con`")
+            return [], [], []
+
         right_edges = np.zeros(self.beta, dtype=int)
         left_edges = np.zeros(self.beta, dtype=int)
         right_edges[self.beta - 1] = self.R[len(self.f)-1, self.beta-1, self.k]
