@@ -93,8 +93,6 @@ def outlier_removal(values, f, cont=0.02):
     data = np.repeat(values, f)
     clf = LocalOutlierFactor(contamination=0.02)
     res = clf.fit_predict(data.reshape(-1, 1))
-    print('outliers')
-    print(len(data[res == -1]))
     data = data[res == 1]
     values, f = np.unique(data, return_counts=True)
     return values, f
