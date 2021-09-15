@@ -23,3 +23,5 @@ This project was implemented under the frame of the Database Systems course of t
 5. In jupyter lab find the notebooks in the experiments folder and run the exeriments (there are instructions there).
 Make sure you select the virtualenv you created as the kernel of the notebook you wish to run (probably named `Python 3 (ipykernel)`
 if you started jupyter lab inside the virtualenv).
+
+NOTE: The project was implemented and tested on Python 3.8.5. Some requirements may not work for previous versions.
